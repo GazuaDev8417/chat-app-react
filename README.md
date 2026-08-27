@@ -33,6 +33,12 @@ A full-stack, real-time messaging application built with **React**, **TypeScript
 
 ---
 
+## ⚡ Interactive Live Demo
+
+* 🌐 **Live Web Application:** [https://chat-app-react-lac-two.vercel.app](https://chat-app-react-lac-two.vercel.app)
+* 💼 **Developer Portfolio:** [https://portfolio-vtu0.onrender.com](https://portfolio-vtu0.onrender.com)
+
+---
 ## Architecture Overview
 
 ```text

@@ -10,7 +10,7 @@ import type { Messages, User } from '../types'
 
 
 
-const BASE_URL = import.meta.env.API_BASE_URL
+const BASE_URL = import.meta.env.VITE_BASE_URL
 
 
 
@@ -66,7 +66,7 @@ const ChatPage:FC = ()=>{
     }
 
 
-    const deleteUserMessage = async()=>{
+    const deleteUserMessage = async():Promise<boolean>=>{
         try{
             const response = await fetch(`${BASE_URL}/messages`, {
                 method:'DELETE',
@@ -77,6 +77,9 @@ const ChatPage:FC = ()=>{
                 setMessages((prev) => prev.filter((m) => m.sender !== username))
                 return true
             }
+
+            const errorData = await response.json().catch(() => null)
+            console.error('API Error Response: ', errorData)
             return false
         }catch{
             return false
