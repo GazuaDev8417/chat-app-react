@@ -276,6 +276,7 @@ body {
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s ease;
+  width: 100%;
 }
 
 .input-field:focus {

@@ -53,8 +53,8 @@ const LoginPage:FC = ()=>{
 
             login(data.token, nickname);
             navigate('/chat');
-        }catch{
-            alert('Server unavailable. Please try again later')
+        }catch(e:any){
+            alert(e)
         }
     }
 
@@ -64,11 +64,12 @@ const LoginPage:FC = ()=>{
                 <h2>Join Chat</h2>
                 <form onSubmit={handleSubmit}>
                     <div style={{marginBottom:10}}>
-                        <label htmlFor="nickname">Username:{' '}</label>
+                        {/* <label htmlFor="nickname">Username:{' '}</label> */}
                         <input
                             type="text"
                             id="nickname"
                             className="input-field"
+                            placeholder="Username"
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                             required
