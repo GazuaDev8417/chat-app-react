@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useSocket } from '../hooks/useSocket';
+import { useSocket } from '../context/SocketContext';
 import MessageList from '../components/MessageList';
 import type{ Messages } from '../types';
 
@@ -10,7 +10,7 @@ const PrivateChatPage: React.FC = () => {
   const socket = useSocket();
   const navigate = useNavigate();
 
-  const recipient = localStorage.getItem('privatePartner');
+  const recipient = sessionStorage.getItem('privatePartner');
   const [messages, setMessages] = useState<Messages[]>([]);
   const [inputMessage, setInputMessage] = useState('');
 
@@ -23,6 +23,12 @@ const PrivateChatPage: React.FC = () => {
     if(!socket) return
 
     const handlePrivateMessage = (msg:Messages)=>{
+      console.log('PRIVATE MESSAGE RECEIVED:', {
+          currentUser: username,
+          recipient,
+          message: msg
+      })
+
       if(msg.sender === recipient){
         setMessages((prev) => [...prev, msg])
       }
@@ -53,7 +59,7 @@ const PrivateChatPage: React.FC = () => {
   };
 
   const handleExitPrivate = () => {
-    localStorage.removeItem('privatePartner');
+    sessionStorage.removeItem('privatePartner');
     navigate('/chat');
   };
 

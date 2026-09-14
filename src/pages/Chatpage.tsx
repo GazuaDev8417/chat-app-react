@@ -1,7 +1,7 @@
 import { useState, useEffect, type FC, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { useSocket } from "../hooks/useSocket"
+import { useSocket } from "../context/SocketContext"
 import Header from "../components/Header"
 import MessageList from "../components/MessageList"
 import UserDrawer from "../components/UserDrawer"
@@ -31,18 +31,52 @@ const ChatPage:FC = ()=>{
         socket.on('messages:history', (history:Messages[]) => setMessages(history))
         socket.on('message:received', (msg:Messages) => setMessages((prev) => [...prev, msg]))
         socket.on('users:list', (usersList:User[]) => setUsers(usersList))
-        socket.on('private:request_received', ({ sender }: { sender:string })=>{
-            if(window.confirm(`${sender} wants to start a private chat with you. Accept?`)){
-                localStorage.setItem('privatePartner', sender)
-                socket.emit('private:accept', { sender })
+
+        // socket.on('private:request_received', ({ sender }: { sender:string })=>{
+        //     if(window.confirm(`${sender} wants to start a private chat with you. Accept?`)){
+        //         sessionStorage.setItem('privatePartner', sender)
+        //         socket.emit('private:accept', { sender })
+        //         navigate('/private')
+        //     }
+        // })
+
+        const handlePrivateRequest = ({ sender }: { sender:string})=>{
+            console.log('PRIVATE REQUEST RECEIVED ON CLIENT:', {
+                currentUser: username,
+                sender
+            });
+
+            const accepted = window.confirm(
+                `${sender} wants to start a private chat with you. Accept?`
+            );
+
+            console.log('PRIVATE REQUEST ANSWER:', { accepted });
+
+            if(accepted){
+                sessionStorage.setItem('privatePartner', sender);
+                socket.emit('private:accept', { sender });
                 navigate('/private')
             }
-        })
+        }
 
-        socket.on('private:started', ({ partner }: { partner:string })=>{
-            localStorage.setItem('privatePartner', partner)
-            navigate('/private')
-        })
+        socket.on('private:request_received', handlePrivateRequest)
+
+        // socket.on('private:started', ({ partner }: { partner:string })=>{
+        //     sessionStorage.setItem('privatePartner', partner)
+        //     navigate('/private')
+        // })
+
+        const handlePrivateStarted = ({ partner }: { partner: string }) => {
+            console.log('PRIVATE CHAT STARTED ON CLIENT:', {
+                currentUser: username,
+                partner
+            });
+
+            sessionStorage.setItem('privatePartner', partner);
+            navigate('/private');
+        };
+
+        socket.on('private:started', handlePrivateStarted);
 
         socket.on('private:error', (errorMsg:string)=>{
             alert(errorMsg)
@@ -52,7 +86,9 @@ const ChatPage:FC = ()=>{
             socket.off('messages:history')
             socket.off('message:received')
             socket.off('users:list')
-            socket.off('private:request_received')
+            socket.off('private:request_received', handlePrivateRequest)
+            socket.off('private:started', handlePrivateStarted)
+            socket.off('private:error')
         }
     }, [socket, navigate])
 
@@ -130,7 +166,16 @@ const ChatPage:FC = ()=>{
     const handleSelectUser = (targetUsername:string, isMe:boolean)=>{
         if(isMe){
             setIsDeleteModalOpen(true)
-        }else if(socket){
+            return
+        }
+
+        console.log('PRIVATE REQUEST CLICK:', {
+            targetUsername,
+            socketExists: Boolean(socket),
+            connected: socket?.connected
+        })
+        
+        if(socket){
             socket.emit('private:request', { recipient: targetUsername })
         }
     }
