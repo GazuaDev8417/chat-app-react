@@ -28,9 +28,19 @@ const ChatPage:FC = ()=>{
     useEffect(()=>{
         if(!socket) return
 
-        socket.on('messages:history', (history:Messages[]) => setMessages(history))
+        //socket.on('messages:history', (history:Messages[]) => setMessages(history))
+        const handlePublicHistory = (history: Messages[]) => {
+            setMessages(history);
+        };
+
+        socket.on('public:history', handlePublicHistory);
+        socket.emit('public:history:request')
+        
         socket.on('message:received', (msg:Messages) => setMessages((prev) => [...prev, msg]))
+        
         socket.on('users:list', (usersList:User[]) => setUsers(usersList))
+        socket.emit('users:list:request');
+        
 
         // socket.on('private:request_received', ({ sender }: { sender:string })=>{
         //     if(window.confirm(`${sender} wants to start a private chat with you. Accept?`)){
@@ -83,7 +93,7 @@ const ChatPage:FC = ()=>{
         })
 
         return ()=>{
-            socket.off('messages:history')
+            socket.off('public:history', handlePublicHistory)
             socket.off('message:received')
             socket.off('users:list')
             socket.off('private:request_received', handlePrivateRequest)

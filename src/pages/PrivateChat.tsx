@@ -5,6 +5,9 @@ import { useSocket } from '../context/SocketContext';
 import MessageList from '../components/MessageList';
 import type{ Messages } from '../types';
 
+
+
+
 const PrivateChatPage: React.FC = () => {
   const { username } = useAuth();
   const socket = useSocket();
